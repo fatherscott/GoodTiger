@@ -1,4 +1,5 @@
 *.sln
+.vs
 /GoodTiger/bin
 /GoodTiger/obj
 /Client/bin
