@@ -1,3 +1,5 @@
 *.sln
 /GoodTiger/bin
 /GoodTiger/obj
+/Client/bin
+/Client/obj
