@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.ObjectPool;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Protocol;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -15,20 +18,27 @@ namespace GoodTiger
         protected BufferBlock<StateObject> _recycling { get; set; } = new BufferBlock<StateObject>();
         protected ActionBlock<StateObject> _userState { get; set; } = null;
         protected CancellationTokenSource _recvCancel = new CancellationTokenSource();
-
         protected ObjectPool<SocketBuffer> _socketBufferPool { get; set; } = null;
 
+        protected ObjectPool<MainObject> _mainObjectPool { get; set; } = null;
+        protected BufferBlock<Protocol.Base> _mainChan { get; set; } = new BufferBlock<Protocol.Base>();
+        protected JsonSerializer _jsonSerializer = new JsonSerializer();
 
         //Initialization
         public void Initialization(int poolSize)
         {
             _socketBufferPool = ObjectPool.Create<SocketBuffer>();
+            _mainObjectPool = ObjectPool.Create<MainObject>();
 
             if (_recycling.Count == 0)
             {
                 for (int i = 0; i < poolSize; i++)
                 {
                     StateObject state = new StateObject();
+                    state.RecvCancel = _recvCancel;
+                    state.SocketBufferPool = _socketBufferPool;
+                    state.MainChan = _mainChan;
+                    state.JsonSerializer = _jsonSerializer;
                     _recycling.Post(state);
                 }
             }
@@ -44,7 +54,7 @@ namespace GoodTiger
 
         public async Task StartListening()
         {
-            TcpListener server = null;
+            Socket listener = null;
 
             try
             {
@@ -53,20 +63,28 @@ namespace GoodTiger
                 // running the listener is "host.contoso.com".  
                 //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
                 //IPAddress ipAddress = ipHostInfo.AddressList[0];
-                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 11000);
+                int port = 11000;
+                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, port);
 
-                server = new TcpListener(localEndPoint);
+                listener = new Socket(localEndPoint.AddressFamily, SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
+
+                listener.Bind(localEndPoint);
+                listener.Listen(100);
+
+                Console.WriteLine($"Bind IP:Any, Port:{port}");
+
+                //server = new TcpListener(localEndPoint);
 
                 // Start listening for client requests.
-                server.Start();
+                //server.Start();
 
-                while(true)
+                while (true)
                 {
                     var state = await _recycling.ReceiveAsync();
-                    state.RecvCancel = _recvCancel;
-                    state.SocketBufferPool = _socketBufferPool;
+                    
+                    state.UID = string.Empty;
 
-                    state.Client = server.AcceptTcpClient();
+                    state.Socket = await listener.AcceptAsync(state.Socket);
 
                     _userState.Post(state);
                 }
@@ -78,7 +96,7 @@ namespace GoodTiger
             finally
             {
                 // Stop listening for new clients.
-                server.Stop();
+                listener.Close();
             }
 
             _recvCancel.Cancel();

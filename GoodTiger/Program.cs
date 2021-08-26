@@ -10,7 +10,7 @@ namespace GoodTiger
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine($"GoodTimger Start");
 
             SocketManager manager = new SocketManager();
             manager.Initialization(30000);
