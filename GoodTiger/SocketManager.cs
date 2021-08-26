@@ -20,15 +20,15 @@ namespace GoodTiger
         protected CancellationTokenSource _recvCancel = new CancellationTokenSource();
         protected ObjectPool<SocketBuffer> _socketBufferPool { get; set; } = null;
 
-        protected ObjectPool<MainObject> _mainObjectPool { get; set; } = null;
-        protected BufferBlock<Protocol.Base> _mainChan { get; set; } = new BufferBlock<Protocol.Base>();
+        protected BufferBlock<Base> _mainChan { get; set; } = new BufferBlock<Protocol.Base>();
         protected JsonSerializer _jsonSerializer = new JsonSerializer();
+
+        protected Task _mainProc { get; set; } = null;
 
         //Initialization
         public void Initialization(int poolSize)
         {
             _socketBufferPool = ObjectPool.Create<SocketBuffer>();
-            _mainObjectPool = ObjectPool.Create<MainObject>();
 
             if (_recycling.Count == 0)
             {
@@ -39,17 +39,18 @@ namespace GoodTiger
                     state.SocketBufferPool = _socketBufferPool;
                     state.MainChan = _mainChan;
                     state.JsonSerializer = _jsonSerializer;
+                    state.Recycling = _recycling;
                     _recycling.Post(state);
                 }
             }
 
-            //var maxDegreeOfParallelism = 100000;
+            _mainProc = Task.Run(()=> MainProc());
 
-            // Create an ActionBlock<int> that performs some work.
             _userState = new ActionBlock<StateObject>(Recv, new ExecutionDataflowBlockOptions
             {
                 MaxDegreeOfParallelism = poolSize
             });
+
         }
 
         public async Task StartListening()
@@ -58,11 +59,6 @@ namespace GoodTiger
 
             try
             {
-                // Establish the local endpoint for the socket.  
-                // The DNS name of the computer  
-                // running the listener is "host.contoso.com".  
-                //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                //IPAddress ipAddress = ipHostInfo.AddressList[0];
                 int port = 11000;
                 IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, port);
 
@@ -73,10 +69,6 @@ namespace GoodTiger
 
                 Console.WriteLine($"Bind IP:Any, Port:{port}");
 
-                //server = new TcpListener(localEndPoint);
-
-                // Start listening for client requests.
-                //server.Start();
 
                 while (true)
                 {
@@ -84,9 +76,9 @@ namespace GoodTiger
                     
                     state.UID = string.Empty;
 
-                    state.Socket = await listener.AcceptAsync(state.Socket);
+                    state.Socket = await listener.AcceptAsync();
 
-                    _userState.Post(state);
+                    await _userState.SendAsync(state);
                 }
             }
             catch (SocketException e)
@@ -95,15 +87,16 @@ namespace GoodTiger
             }
             finally
             {
-                // Stop listening for new clients.
                 listener.Close();
             }
 
             _recvCancel.Cancel();
 
             _userState.Complete();
-            _userState.Completion.Wait();
+            await _userState.Completion;
 
+            await _mainChan.SendAsync(null);
+            await Task.WhenAll(_mainProc);
 
             Console.WriteLine("\nHit enter to continue...");
             Console.Read();

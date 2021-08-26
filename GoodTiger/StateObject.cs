@@ -16,11 +16,12 @@ namespace GoodTiger
         public Socket Socket { get; set; } = null;
         //public NetworkStream Strem { get; set; } = null;
         public SocketBuffer RecvBuffer { get; set; } = new SocketBuffer();
-        public BufferBlock<SocketBuffer> SendChan { get; set; } = new BufferBlock<SocketBuffer>();
+        public BufferBlock<Base> SendChan { get; set; } = new BufferBlock<Base>();
         public CancellationTokenSource RecvCancel { get; set; } = default;
-        public CancellationTokenSource SendCancel = new CancellationTokenSource();
         public ObjectPool<SocketBuffer> SocketBufferPool { get; set; } = null;
         public BufferBlock<Protocol.Base> MainChan { get; set; } = null;
         public JsonSerializer JsonSerializer { get; set; } = null;
+        public BufferBlock<StateObject> Recycling { get; set; } = null;
+        public CancellationTokenSource SendCancel { get; set; } = new CancellationTokenSource();
     }
 }

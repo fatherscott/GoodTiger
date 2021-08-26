@@ -8,6 +8,6 @@ namespace GoodTiger
         public string UID { get; set; }
         public string Room { get; set; }
         public string NickName { get; set; }
-        public BufferBlock<SocketBuffer> SendChan { get; set; }
+        public BufferBlock<Base> SendChan { get; set; }
     }
 }

@@ -55,7 +55,7 @@ namespace Protocol
             }
         }
 
-        protected int Worked { get; set; } = 0;
+        public int Worked { get; set; } = 0;
 
         protected async Task ReadType(NetworkStream strem, CancellationToken cancellationToken = default)
         {

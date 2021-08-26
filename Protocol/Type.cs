@@ -51,6 +51,7 @@ namespace Protocol
             writer.Flush();
 
             buffer.Length = (int)ms.Position;
+            buffer.Worked = 0;
         }
 
         public static Base Class(ProtocolType type, JsonTextReader jsonReader, JsonSerializer jsonSerializer)

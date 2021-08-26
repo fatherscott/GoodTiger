@@ -6,6 +6,7 @@ namespace Protocol
 {
     public class MessageResponse : Base
     {
-
+        public string UID { get; set; }
+        public string Message { get; set; }
     }
 }

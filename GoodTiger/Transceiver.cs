@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -13,28 +14,34 @@ namespace GoodTiger
     {
         public async Task Send(StateObject stateObject)
         {
-            while (await stateObject.SendChan.OutputAvailableAsync())
+            try
             {
-                var buffer = await stateObject.SendChan.ReceiveAsync();
-
-                if (buffer == null)
+                while (await stateObject.SendChan.OutputAvailableAsync(stateObject.SendCancel.Token))
                 {
-                    break;
+                    var protocol = await stateObject.SendChan.ReceiveAsync();
+
+                    if (protocol == null)
+                    {
+                        return;
+                    }
+
+                    await using var Strem = new NetworkStream(stateObject.Socket);
+
+                    var buffer = stateObject.SocketBufferPool.Get();
+                    await buffer.Write(Strem, protocol, _jsonSerializer, stateObject.SendCancel.Token);
+                    stateObject.SocketBufferPool.Return(buffer);
+
+                    protocol.Dispose();
                 }
-                await using var Strem = new NetworkStream(stateObject.Socket);
-
-                await Strem.WriteAsync(buffer.HeaderBuffer, 0, 4, stateObject.SendCancel.Token);
-                await Strem.WriteAsync(buffer.DataBuffer, 0, buffer.Length);
-
-                stateObject.SocketBufferPool.Return(buffer);
+            }
+            catch (Exception)
+            {
             }
         }
 
         public async Task Recv(StateObject stateObject)
         {
-            //전송 채널 생성
-            var sendBlock = new ActionBlock<StateObject>(Send);
-            sendBlock.Post(stateObject);
+            var sendTask = Task.Run(() => Send(stateObject));
 
             try
             {
@@ -45,7 +52,7 @@ namespace GoodTiger
 
                     if (obj != null)
                     {
-                        if (!Parse(stateObject, obj))
+                        if (!await Parse(stateObject, obj))
                         {
                             throw new Exception("Parsing failed");
                         }
@@ -54,7 +61,7 @@ namespace GoodTiger
             }
             catch (Exception e)
             {
-                Console.WriteLine($"{e.Message}, {e.StackTrace}");
+                //Console.WriteLine($"{e.Message}, {e.StackTrace}");
             }
 
             if (!string.IsNullOrEmpty(stateObject.UID))
@@ -63,20 +70,20 @@ namespace GoodTiger
                 {
                     UID = stateObject.UID
                 };
-                stateObject.MainChan.Post(logout);
+                await stateObject.MainChan.SendAsync(logout);
             }
 
-            stateObject.SendChan.Post(null);
             stateObject.SendCancel.Cancel();
+            await stateObject.SendChan.SendAsync(null);
+            await Task.WhenAll(sendTask);
 
-            sendBlock.Complete();
-            sendBlock.Completion.Wait();
 
-            //await stateObject.Strem.DisposeAsync();
             stateObject.Socket.Close();
+
+            await stateObject.Recycling.SendAsync(stateObject);
         }
 
-        public bool Parse(StateObject stateObject, Protocol.Base packet)
+        public async Task<bool> Parse(StateObject stateObject, Protocol.Base packet)
         {
             try
             {
@@ -91,7 +98,7 @@ namespace GoodTiger
                         csLogin.Room = login.Room;
                         csLogin.NickName = login.NickName;
                         csLogin.SendChan = stateObject.SendChan;
-                        stateObject.MainChan.Post(csLogin);
+                        await stateObject.MainChan.SendAsync(csLogin);
 
                         login.Dispose();
                         break;
@@ -100,14 +107,16 @@ namespace GoodTiger
 
                         var csMessage = new CSMessage();
 
-                        if(string.IsNullOrWhiteSpace(stateObject.UID))
+                        if (string.IsNullOrWhiteSpace(stateObject.UID))
                         {
                             return false;
                         }
 
                         csMessage.UID = stateObject.UID;
                         csMessage.Message = message.Message;
-                        stateObject.MainChan.Post(csMessage);
+                        await stateObject.MainChan.SendAsync(csMessage);
+
+                        Console.WriteLine($"message {stateObject.UID}, { message.Message}");
 
                         message.Dispose();
                         break;
