@@ -41,7 +41,7 @@ namespace GoodTiger
 
         public async Task Recv(StateObject stateObject)
         {
-            var sendTask = Task.Run(() => Send(stateObject));
+            var sendTask = Task.Run(async () => await Send(stateObject));
 
             try
             {
@@ -77,6 +77,7 @@ namespace GoodTiger
             await stateObject.SendChan.SendAsync(null);
             await Task.WhenAll(sendTask);
 
+            Console.WriteLine($"exit {stateObject.UID}");
 
             stateObject.Socket.Close();
 

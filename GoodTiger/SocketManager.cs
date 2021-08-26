@@ -16,7 +16,7 @@ namespace GoodTiger
     public partial class SocketManager
     {
         protected BufferBlock<StateObject> _recycling { get; set; } = new BufferBlock<StateObject>();
-        protected ActionBlock<StateObject> _userState { get; set; } = null;
+        //protected ActionBlock<StateObject> _userState { get; set; } = null;
         protected CancellationTokenSource _recvCancel = new CancellationTokenSource();
         protected ObjectPool<SocketBuffer> _socketBufferPool { get; set; } = null;
 
@@ -44,12 +44,12 @@ namespace GoodTiger
                 }
             }
 
-            _mainProc = Task.Run(()=> MainProc());
+            _mainProc = Task.Run(async ()=> await MainProc());
 
-            _userState = new ActionBlock<StateObject>(Recv, new ExecutionDataflowBlockOptions
-            {
-                MaxDegreeOfParallelism = poolSize
-            });
+            //_userState = new ActionBlock<StateObject>(Recv, new ExecutionDataflowBlockOptions
+            //{
+            //    MaxDegreeOfParallelism = poolSize
+            //});
 
         }
 
@@ -78,7 +78,9 @@ namespace GoodTiger
 
                     state.Socket = await listener.AcceptAsync();
 
-                    await _userState.SendAsync(state);
+                    await Task.Run(() => Recv(state)); ;
+
+                    //await _userState.SendAsync(state);
                 }
             }
             catch (SocketException e)
@@ -92,8 +94,8 @@ namespace GoodTiger
 
             _recvCancel.Cancel();
 
-            _userState.Complete();
-            await _userState.Completion;
+            //_userState.Complete();
+            //await _userState.Completion;
 
             await _mainChan.SendAsync(null);
             await Task.WhenAll(_mainProc);
