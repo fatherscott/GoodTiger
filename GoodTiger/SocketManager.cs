@@ -70,22 +70,30 @@ namespace GoodTiger
                 Console.WriteLine($"Bind IP:Any, Port:{port}");
 
 
-                while (true)
+                try
                 {
-                    var state = await _recycling.ReceiveAsync();
-                    
-                    state.UID = string.Empty;
+                    while (true)
+                    {
+                        var state = await _recycling.ReceiveAsync();
 
-                    state.Socket = await listener.AcceptAsync();
+                        state.UID = string.Empty;
 
-                    await Task.Run(async () => await Recv(state)); ;
+                        state.Socket = await listener.AcceptAsync();
 
-                    //await _userState.SendAsync(state);
+                        await Task.Run(async () => await Recv(state)); ;
+
+                        //await _userState.SendAsync(state);
+                    }
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Exception: {0}", e);
+                }
+              
             }
-            catch (SocketException e)
+            catch (Exception e)
             {
-                Console.WriteLine("SocketException: {0}", e);
+                Console.WriteLine("Exception: {0}", e);
             }
             finally
             {

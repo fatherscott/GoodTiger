@@ -18,7 +18,7 @@ namespace Client
 
             var clients = new ActionBlock<JsonSerializer>(Client.Work, new ExecutionDataflowBlockOptions
             {
-                MaxDegreeOfParallelism = 500
+                MaxDegreeOfParallelism = 300
             });
 
             for(int i = 0; i < 90000; i++)
