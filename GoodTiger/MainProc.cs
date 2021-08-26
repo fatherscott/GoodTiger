@@ -1,4 +1,5 @@
 ﻿using Protocol;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -89,9 +90,9 @@ namespace GoodTiger
                             break;
                     }
                 }
-                catch
+                catch (Exception e)
                 {
-
+                    Console.WriteLine($"{e.Message}, {e.StackTrace}");
                 }
             }
         }

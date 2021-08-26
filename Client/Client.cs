@@ -36,14 +36,12 @@ namespace Client
                     await using var stream = new NetworkStream(client, false);
                     await socketBuffer.Write(stream, login, jsonSerializer);
                 }
-
                 {
                     await using var stream = new NetworkStream(client, false);
                     var response = await socketBuffer.Read(stream, jsonSerializer);
                 }
 
-
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     using (MessageRequest message = new MessageRequest() { Message = $"Hello World {i}" })
                     {
