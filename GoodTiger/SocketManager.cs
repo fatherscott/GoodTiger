@@ -78,7 +78,7 @@ namespace GoodTiger
 
                     state.Socket = await listener.AcceptAsync();
 
-                    await Task.Run(() => Recv(state)); ;
+                    await Task.Run(async () => await Recv(state)); ;
 
                     //await _userState.SendAsync(state);
                 }
