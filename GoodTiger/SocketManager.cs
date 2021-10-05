@@ -79,8 +79,9 @@ namespace GoodTiger
                         state.UID = string.Empty;
 
                         state.Socket = await listener.AcceptAsync();
-
-                        Task.Run(async () => await Recv(state)); 
+#pragma warning disable CS4014
+                        Task.Run(async () => await Recv(state));
+#pragma warning restore CS4014
 
                         //await _userState.SendAsync(state);
                     }
