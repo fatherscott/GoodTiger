@@ -67,7 +67,7 @@ namespace GoodTiger
                 listener.Bind(localEndPoint);
                 listener.Listen(100);
 
-                Console.WriteLine($"Bind IP:Any, Port:{port}");
+                Logger.Instance.Info($"Bind IP:Any, Port:{port}");
 
 
                 try
@@ -88,13 +88,13 @@ namespace GoodTiger
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Exception: {0}", e);
+                    Logger.Instance.Error("Exception", e);
                 }
               
             }
             catch (Exception e)
             {
-                Console.WriteLine("Exception: {0}", e);
+                Logger.Instance.Error("Exception", e);
             }
             finally
             {

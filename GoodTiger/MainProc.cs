@@ -92,7 +92,7 @@ namespace GoodTiger
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"{e.Message}, {e.StackTrace}");
+                    Logger.Instance.Error($"{e.Message}, {e.StackTrace}");
                 }
             }
         }

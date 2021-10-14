@@ -59,9 +59,8 @@ namespace GoodTiger
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                //Console.WriteLine($"{e.Message}, {e.StackTrace}");
             }
 
             if (!string.IsNullOrEmpty(stateObject.UID))
@@ -77,7 +76,7 @@ namespace GoodTiger
             await stateObject.SendChan.SendAsync(null);
             await Task.WhenAll(sendTask);
 
-            Console.WriteLine($"exit {stateObject.UID}");
+            Logger.Instance.Trace($"exit {stateObject.UID}");
 
             stateObject.Socket.Close();
 
@@ -117,7 +116,7 @@ namespace GoodTiger
                         csMessage.Message = message.Message;
                         await stateObject.MainChan.SendAsync(csMessage);
 
-                        Console.WriteLine($"message {stateObject.UID}, { message.Message}");
+                        Logger.Instance.Trace($"message {stateObject.UID}, { message.Message}");
 
                         message.Dispose();
                         break;
