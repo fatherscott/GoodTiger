@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.ObjectPool;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Protocol;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -16,7 +13,6 @@ namespace GoodTiger
     public partial class SocketManager
     {
         protected BufferBlock<StateObject> _recycling { get; set; } = new BufferBlock<StateObject>();
-        //protected ActionBlock<StateObject> _userState { get; set; } = null;
         protected CancellationTokenSource _recvCancel = new CancellationTokenSource();
         protected ObjectPool<SocketBuffer> _socketBufferPool { get; set; } = null;
 
@@ -24,8 +20,6 @@ namespace GoodTiger
         protected JsonSerializer _jsonSerializer = new JsonSerializer();
 
         protected Task _mainProc { get; set; } = null;
-
-        //Initialization
         public void Initialization(int poolSize)
         {
             _socketBufferPool = ObjectPool.Create<SocketBuffer>();
@@ -45,15 +39,9 @@ namespace GoodTiger
             }
 
             _mainProc = Task.Run(async ()=> await MainProc());
-
-            //_userState = new ActionBlock<StateObject>(Recv, new ExecutionDataflowBlockOptions
-            //{
-            //    MaxDegreeOfParallelism = poolSize
-            //});
-
         }
 
-        public async Task StartListening()
+        public async Task StartListening(BufferBlock<Socket> serverSocektChan = null)
         {
             Socket listener = null;
 
@@ -69,6 +57,11 @@ namespace GoodTiger
 
                 Logger.Instance.Info($"Bind IP:Any, Port:{port}");
 
+                if (serverSocektChan != null)
+                {
+                    await serverSocektChan.SendAsync(listener);
+                }
+
 
                 try
                 {
@@ -83,7 +76,6 @@ namespace GoodTiger
                         Task.Run(async () => await Recv(state));
 #pragma warning restore CS4014
 
-                        //await _userState.SendAsync(state);
                     }
                 }
                 catch (Exception e)
@@ -103,14 +95,11 @@ namespace GoodTiger
 
             _recvCancel.Cancel();
 
-            //_userState.Complete();
-            //await _userState.Completion;
-
             await _mainChan.SendAsync(null);
             await Task.WhenAll(_mainProc);
 
-            Console.WriteLine("\nHit enter to continue...");
-            Console.Read();
+            //Console.WriteLine("\nHit enter to continue...");
+            //Console.Read();
 
         }
     }
