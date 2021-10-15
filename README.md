@@ -1,8 +1,8 @@
 # GoodTiger
 
-C# socket server made for Sunhoo.
+C# socket server made for SeanWhoo.
 
-Sunhoo, make sure to use it.
+SeanWhoo, make sure to use it.
 
 Contact kakao https://open.kakao.com/o/g66zPHD
 
