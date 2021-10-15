@@ -2,7 +2,9 @@
 
 I opened the Golang version of the socket server, but it was not popular, so I created a socket server for C#.
 
-C# socket server made for room manager B, Sunhoo.
+C# socket server made for Sunhoo.
+
+Sunhoo, make sure to use it.
 
 Contact kakao https://open.kakao.com/o/g66zPHD
 
