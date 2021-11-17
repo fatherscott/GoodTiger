@@ -1,8 +1,10 @@
 # GoodTiger
 
-C# socket server made for SeanWhoo.
+c# Socket server.
 
-SeanWhoo, make sure to use it.
+It started for hu, but it's open to everyone.
+
+If you ask questions or requests through Kakao Talk or issues, we'll review them and proceed.
 
 Contact kakao https://open.kakao.com/o/g66zPHD
 
