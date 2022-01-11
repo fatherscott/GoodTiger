@@ -20,8 +20,10 @@ namespace GoodTiger
         protected JsonSerializer _jsonSerializer = new JsonSerializer();
 
         protected Task _mainProc { get; set; } = null;
-        public void Initialization(int poolSize)
+        protected int _port = 11000;
+        public void Initialization(int port, int poolSize)
         {
+            _port = port;
             _socketBufferPool = ObjectPool.Create<SocketBuffer>();
 
             if (_recycling.Count == 0)
@@ -47,15 +49,14 @@ namespace GoodTiger
 
             try
             {
-                int port = 11000;
-                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, port);
+                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, _port);
 
                 listener = new Socket(localEndPoint.AddressFamily, SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
 
                 listener.Bind(localEndPoint);
                 listener.Listen(100);
 
-                Logger.Instance.Info($"Bind IP:Any, Port:{port}");
+                Logger.Instance.Info($"Bind IP:Any, Port:{_port}");
 
                 if (serverSocektChan != null)
                 {
@@ -97,9 +98,6 @@ namespace GoodTiger
 
             await _mainChan.SendAsync(null);
             await Task.WhenAll(_mainProc);
-
-            //Console.WriteLine("\nHit enter to continue...");
-            //Console.Read();
 
         }
     }

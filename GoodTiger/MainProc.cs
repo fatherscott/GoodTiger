@@ -73,7 +73,7 @@ namespace GoodTiger
                         case CSMessage message:
                             if (users.ContainsKey(message.UID))
                             {
-                                using var login = users[message.UID];
+                                var login = users[message.UID];
                                 if (rooms.ContainsKey(login.Room))
                                 {
                                     foreach (var user in rooms[login.Room])

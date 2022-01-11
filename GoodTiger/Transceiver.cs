@@ -83,7 +83,7 @@ namespace GoodTiger
             await stateObject.Recycling.SendAsync(stateObject);
         }
 
-        public async Task<bool> Parse(StateObject stateObject, Protocol.Base packet)
+        public async Task<bool> Parse(StateObject stateObject, Base packet)
         {
             try
             {
@@ -99,8 +99,6 @@ namespace GoodTiger
                         csLogin.NickName = login.NickName;
                         csLogin.SendChan = stateObject.SendChan;
                         await stateObject.MainChan.SendAsync(csLogin);
-
-                        login.Dispose();
                         break;
 
                     case MessageRequest message:
@@ -117,8 +115,6 @@ namespace GoodTiger
                         await stateObject.MainChan.SendAsync(csMessage);
 
                         Logger.Instance.Trace($"message {stateObject.UID}, { message.Message}");
-
-                        message.Dispose();
                         break;
 
                     default:
@@ -128,6 +124,10 @@ namespace GoodTiger
             catch (Exception)
             {
                 return false;
+            }
+            finally
+            {
+                packet.Dispose();
             }
             return true;
         }
