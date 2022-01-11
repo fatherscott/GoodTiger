@@ -12,6 +12,7 @@ namespace GoodTiger
         {
             var users = new Dictionary<string, CSLogin>();
             var rooms = new Dictionary<string, Dictionary<string, CSLogin>>();
+            var tasks = new List<Task>();
 
             while (true)
             {
@@ -76,6 +77,7 @@ namespace GoodTiger
                                 var login = users[message.UID];
                                 if (rooms.ContainsKey(login.Room))
                                 {
+                                    tasks.Clear();
                                     foreach (var user in rooms[login.Room])
                                     {
                                         var messageResponse = new MessageResponse()
@@ -83,8 +85,9 @@ namespace GoodTiger
                                             UID = login.UID,
                                             Message = message.Message,
                                         };
-                                        await user.Value.SendChan.SendAsync(messageResponse);
+                                        tasks.Add(user.Value.SendChan.SendAsync(messageResponse));
                                     }
+                                    await Task.WhenAll(tasks);
                                 }
                             }
                             break;
