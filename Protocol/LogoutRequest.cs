@@ -2,7 +2,8 @@
 
 namespace Protocol
 {
-    public class LogoutRequest : Base
+    public class LogoutRequest : ClientProtocol
     {
+        public override ProtocolType Type => ProtocolType.LogoutRequest;
     }
 }

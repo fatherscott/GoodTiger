@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.ObjectPool;
+﻿using GoodTiger.Protocol;
+using Microsoft.Extensions.ObjectPool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Protocol;
@@ -13,15 +14,25 @@ namespace GoodTiger
     public class StateObject
     {
         public string UID { get; set; } = string.Empty;
+        public ulong MemoryId { get; set; } = 0;
         public Socket Socket { get; set; } = null;
-        //public NetworkStream Strem { get; set; } = null;
+
         public SocketBuffer RecvBuffer { get; set; } = new SocketBuffer();
-        public BufferBlock<Base> SendChan { get; set; } = new BufferBlock<Base>();
         public CancellationTokenSource RecvCancel { get; set; } = default;
-        public ObjectPool<SocketBuffer> SocketBufferPool { get; set; } = null;
-        public BufferBlock<Protocol.Base> MainChan { get; set; } = null;
-        public JsonSerializer JsonSerializer { get; set; } = null;
-        public BufferBlock<StateObject> Recycling { get; set; } = null;
+
+        public BufferBlock<global::Protocol.ClientProtocol> SendChan { get; set; } = new BufferBlock<global::Protocol.ClientProtocol>();
+        public ObjectPool<SocketBuffer> SendSocketBufferPool { get; set; } = null;
         public CancellationTokenSource SendCancel { get; set; } = new CancellationTokenSource();
+
+        public BufferBlock<ServerProtocol> MainChan { get; set; } = null;
+        public BufferBlock<StateObject> StateObjectPool { get; set; } = null;
+
+        public void Clear()
+        {
+            UID = string.Empty;
+            MemoryId = 0;
+        }
+
     }
 }
+

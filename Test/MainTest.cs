@@ -32,16 +32,15 @@ namespace BasicTest
                 await client.ConnectAsync(remoteEP);
 
                 SocketBuffer socketBuffer = new SocketBuffer();
-                JsonSerializer jsonSerializer = new JsonSerializer();
 
                 using (LoginRequest login = new LoginRequest() { UID = $"{uid}", Room = "1", NickName = $"tiger{uid}" })
                 {
                     await using var stream = new NetworkStream(client, false);
-                    await socketBuffer.Write(stream, login, jsonSerializer);
+                    await socketBuffer.Write(stream, login);
                 }
                 {
                     await using var stream = new NetworkStream(client, false);
-                    var response = await socketBuffer.Read(stream, jsonSerializer);
+                    var response = await socketBuffer.Read(stream);
                 }
 
                 for (int i = 0; i < 100; i++)
@@ -49,11 +48,11 @@ namespace BasicTest
                     using (MessageRequest message = new MessageRequest() { Message = $"Hello World {i}" })
                     {
                         await using var stream = new NetworkStream(client, false);
-                        await socketBuffer.Write(stream, message, jsonSerializer);
+                        await socketBuffer.Write(stream, message);
                     }
                     {
                         await using var stream = new NetworkStream(client, false);
-                        var response = await socketBuffer.Read(stream, jsonSerializer);
+                        var response = await socketBuffer.Read(stream);
                     }
                 }
                 client.Close();
@@ -68,7 +67,7 @@ namespace BasicTest
         public async Task login_message_test()
         {
             SocketManager manager = new SocketManager();
-            manager.Initialization(11000);
+            manager.Initialization(11000, 1000);
             var server = Task.Run(async () =>
                 await manager.StartListening(_serverSocektChan)
             );
@@ -92,9 +91,6 @@ namespace BasicTest
 
             listener.Close();
             await Task.WhenAll(server);
-
-
-
         }
     }
 }

@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Protocol
 {
-    public class LogoutResponse : Base
+    public class LogoutResponse : ClientProtocol
     {
+        public override ProtocolType Type => ProtocolType.LogoutResponse;
         public string UID { get; set; }
         public string NickName { get; set; }
     }

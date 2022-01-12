@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.ObjectPool;
+﻿using GoodTiger.Protocol;
+using Microsoft.Extensions.ObjectPool;
 using Newtonsoft.Json;
 using Protocol;
 using System;
@@ -12,35 +13,34 @@ namespace GoodTiger
 {
     public partial class SocketManager
     {
-        protected BufferBlock<StateObject> _recycling { get; set; } = new BufferBlock<StateObject>();
+        protected BufferBlock<StateObject> _stageObjectPool { get; set; } = new BufferBlock<StateObject>();
         protected CancellationTokenSource _recvCancel = new CancellationTokenSource();
         protected ObjectPool<SocketBuffer> _socketBufferPool { get; set; } = null;
 
-        protected BufferBlock<Base> _mainChan { get; set; } = new BufferBlock<Protocol.Base>();
-        protected JsonSerializer _jsonSerializer = new JsonSerializer();
+        protected BufferBlock<ServerProtocol> _mainChan { get; set; } = new BufferBlock<ServerProtocol>();
 
         protected Task _mainProc { get; set; } = null;
-        protected int _port = 11000;
+        protected int _port { get; private set; } = 30000;
         public void Initialization(int port, int poolSize)
         {
             _port = port;
+
             _socketBufferPool = ObjectPool.Create<SocketBuffer>();
 
-            if (_recycling.Count == 0)
+            if (_stageObjectPool.Count == 0)
             {
                 for (int i = 0; i < poolSize; i++)
                 {
                     StateObject state = new StateObject();
                     state.RecvCancel = _recvCancel;
-                    state.SocketBufferPool = _socketBufferPool;
+                    state.SendSocketBufferPool = _socketBufferPool;
                     state.MainChan = _mainChan;
-                    state.JsonSerializer = _jsonSerializer;
-                    state.Recycling = _recycling;
-                    _recycling.Post(state);
+                    state.StateObjectPool = _stageObjectPool;
+                    _stageObjectPool.Post(state);
                 }
             }
 
-            _mainProc = Task.Run(async ()=> await MainProc());
+            _mainProc = Task.Run(async () => await MainProc());
         }
 
         public async Task StartListening(BufferBlock<Socket> serverSocektChan = null)
@@ -68,22 +68,21 @@ namespace GoodTiger
                 {
                     while (true)
                     {
-                        var state = await _recycling.ReceiveAsync();
+                        var state = await _stageObjectPool.ReceiveAsync();
 
-                        state.UID = string.Empty;
+                        state.Clear();
 
                         state.Socket = await listener.AcceptAsync();
 #pragma warning disable CS4014
                         Task.Run(async () => await Recv(state));
 #pragma warning restore CS4014
-
                     }
                 }
                 catch (Exception e)
                 {
                     Logger.Instance.Error("Exception", e);
                 }
-              
+
             }
             catch (Exception e)
             {

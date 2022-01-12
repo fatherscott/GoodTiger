@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using GoodTiger.Parse;
 using Protocol;
 using System;
-using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -12,6 +9,7 @@ namespace GoodTiger
 {
     public partial class SocketManager
     {
+
         public async Task Send(StateObject stateObject)
         {
             try
@@ -27,9 +25,9 @@ namespace GoodTiger
 
                     await using var Strem = new NetworkStream(stateObject.Socket);
 
-                    var buffer = stateObject.SocketBufferPool.Get();
-                    await buffer.Write(Strem, protocol, _jsonSerializer, stateObject.SendCancel.Token);
-                    stateObject.SocketBufferPool.Return(buffer);
+                    var buffer = stateObject.SendSocketBufferPool.Get();
+                    await buffer.Write(Strem, protocol, stateObject.SendCancel.Token);
+                    stateObject.SendSocketBufferPool.Return(buffer);
 
                     protocol.Dispose();
                 }
@@ -42,13 +40,12 @@ namespace GoodTiger
         public async Task Recv(StateObject stateObject)
         {
             var sendTask = Task.Run(async () => await Send(stateObject));
-
             try
             {
                 while (true)
                 {
                     await using var strem = new NetworkStream(stateObject.Socket, false);
-                    var obj = await stateObject.RecvBuffer.Read(strem, stateObject.JsonSerializer, stateObject.RecvCancel.Token);
+                    var obj = await stateObject.RecvBuffer.Read(strem, stateObject.RecvCancel.Token);
 
                     if (obj != null)
                     {
@@ -59,8 +56,9 @@ namespace GoodTiger
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine($"{e.Message}");
             }
 
             if (!string.IsNullOrEmpty(stateObject.UID))
@@ -80,42 +78,20 @@ namespace GoodTiger
 
             stateObject.Socket.Close();
 
-            await stateObject.Recycling.SendAsync(stateObject);
+            await stateObject.StateObjectPool.SendAsync(stateObject);
         }
 
-        public async Task<bool> Parse(StateObject stateObject, Base packet)
+        public async Task<bool> Parse(StateObject stateObject, ClientProtocol packet)
         {
             try
             {
                 switch (packet)
                 {
                     case LoginRequest login:
-
-                        stateObject.UID = login.UID;
-
-                        var csLogin = new CSLogin();
-                        csLogin.UID = login.UID;
-                        csLogin.Room = login.Room;
-                        csLogin.NickName = login.NickName;
-                        csLogin.SendChan = stateObject.SendChan;
-                        await stateObject.MainChan.SendAsync(csLogin);
-                        break;
+                        return await login.Parse(stateObject);
 
                     case MessageRequest message:
-
-                        var csMessage = new CSMessage();
-
-                        if (string.IsNullOrWhiteSpace(stateObject.UID))
-                        {
-                            return false;
-                        }
-
-                        csMessage.UID = stateObject.UID;
-                        csMessage.Message = message.Message;
-                        await stateObject.MainChan.SendAsync(csMessage);
-
-                        Logger.Instance.Trace($"message {stateObject.UID}, { message.Message}");
-                        break;
+                        return await message.Parse(stateObject);
 
                     default:
                         return false;
@@ -129,8 +105,6 @@ namespace GoodTiger
             {
                 packet.Dispose();
             }
-            return true;
         }
-
     }
 }

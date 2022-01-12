@@ -31,7 +31,7 @@ namespace Protocol
         {
             get
             {
-                
+
                 return BitConverter.ToInt32(HeaderBuffer);
             }
             set
@@ -39,7 +39,7 @@ namespace Protocol
 
 
                 BitConverter.TryWriteBytes(HeaderBuffer, value);
-                
+
             }
         }
 
@@ -93,7 +93,7 @@ namespace Protocol
                 Array.Reverse(HeaderBuffer);
         }
 
-        protected async Task<Base> ReadData(NetworkStream strem, JsonSerializer jsonSerializer, CancellationToken cancellationToken = default)
+        protected async Task<ClientProtocol> ReadData(NetworkStream strem, CancellationToken cancellationToken = default)
         {
             Worked = 0;
             for (; Worked < Length;)
@@ -106,17 +106,16 @@ namespace Protocol
                 Worked += now;
             }
 
-            await using var ms = new MemoryStream(DataBuffer);
+            await using var ms = new MemoryStream(DataBuffer, 0, Worked);
             using var reader = new StreamReader(ms);
-            using var jsonReader = new JsonTextReader(reader);
-            return Protocol.Type.Class((ProtocolType)Type, jsonReader, jsonSerializer);
+            return ProtocolConverter.StreamToClass((ProtocolType)Type, reader);
         }
 
-        public async Task<Base> Read(NetworkStream strem, JsonSerializer jsonSerializer, CancellationToken cancellationToken = default)
+        public async Task<ClientProtocol> Read(NetworkStream strem, CancellationToken cancellationToken = default)
         {
             await ReadHead(strem, cancellationToken);
             await ReadType(strem, cancellationToken);
-            return await ReadData(strem, jsonSerializer, cancellationToken);
+            return await ReadData(strem, cancellationToken);
         }
 
         protected async Task WriteType(NetworkStream strem, CancellationToken cancellationToken = default)
@@ -135,18 +134,18 @@ namespace Protocol
             await strem.WriteAsync(HeaderBuffer, 0, 4, cancellationToken);
         }
 
-        protected async Task WriteData(NetworkStream strem, JsonSerializer jsonSerializer, CancellationToken cancellationToken = default)
+        protected async Task WriteData(NetworkStream strem, CancellationToken cancellationToken = default)
         {
             await strem.WriteAsync(DataBuffer, Worked, Length - Worked, cancellationToken);
         }
 
-        public async Task Write(NetworkStream strem, Base protocol, JsonSerializer jsonSerializer, CancellationToken cancellationToken = default)
+        public async Task Write(NetworkStream strem, ClientProtocol protocol, CancellationToken cancellationToken = default)
         {
-            await Protocol.Type.FillBuffer(protocol, this, jsonSerializer);
+            await ProtocolConverter.FillBuffer(protocol, this);
 
             await WriteHead(strem, cancellationToken);
             await WriteType(strem, cancellationToken);
-            await WriteData(strem, jsonSerializer, cancellationToken);
+            await WriteData(strem, cancellationToken);
         }
     }
 }

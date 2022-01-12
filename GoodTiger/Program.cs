@@ -40,9 +40,10 @@ namespace GoodTiger
             NLog.LogManager.Configuration = new NLogLoggingConfiguration(nlog);
 
             var port = Configuration.GetValue<int>("Port");
+            var poolSize = Configuration.GetValue<int>("PoolSize");
 
             SocketManager manager = new SocketManager();
-            manager.Initialization(port);
+            manager.Initialization(port, poolSize);
             await manager.StartListening();
         }
     }
