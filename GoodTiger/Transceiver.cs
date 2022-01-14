@@ -18,6 +18,12 @@ namespace GoodTiger
             Login.Initialization();
             Message.Initialization();
         }
+
+        public static void Initialization()
+        {
+
+        }
+
         public async Task Send(StateObject stateObject)
         {
             try
