@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.ObjectPool;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +13,7 @@ namespace GoodTiger.Model
         public Dictionary<string, Dictionary<string, User>> Rooms { get; set; } = new Dictionary<string, Dictionary<string, User>>();
         public List<Task> Tasks { get; set; } = new List<Task>();
         public int ActiveRoomId { get; set; } = 0;
+
+        public ObjectPool<User> UserPool = ObjectPool.Create<User>();
     }
 }

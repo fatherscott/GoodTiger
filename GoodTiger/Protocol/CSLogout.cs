@@ -8,7 +8,6 @@ namespace GoodTiger
 {
     public class CSLogout : ServerProtocol
     {
-        public string UID { get; set; }
 
         public override async Task Job(ServerMemory memory)
         {
@@ -17,21 +16,29 @@ namespace GoodTiger
 
             if (users.ContainsKey(UID))
             {
-                using var login = users[UID];
-                if (rooms.ContainsKey(login.Room))
-                {
-                    rooms[login.Room].Remove(UID);
-                }
-                users.Remove(UID);
 
-                foreach (var user in rooms[login.Room])
+                var user = users[UID];
+                try
                 {
-                    var logoutResponse = new LogoutResponse()
+                    if (rooms.ContainsKey(user.Room))
                     {
-                        UID = login.UID,
-                        NickName = login.NickName,
-                    };
-                    await user.Value.SendChan.SendAsync(logoutResponse);
+                        rooms[user.Room].Remove(UID);
+                    }
+                    users.Remove(UID);
+
+                    foreach (var i in rooms[user.Room])
+                    {
+                        var logoutResponse = new LogoutResponse()
+                        {
+                            UID = user.UID,
+                            NickName = user.NickName,
+                        };
+                        await i.Value.SendChan.SendAsync(logoutResponse);
+                    }
+                }
+                finally
+                {
+                    memory.UserPool.Return(user);
                 }
             }
         }

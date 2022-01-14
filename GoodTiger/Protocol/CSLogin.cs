@@ -9,29 +9,27 @@ namespace GoodTiger
 {
     public class CSLogin : ServerProtocol
     {
-        public string UID { get; set; }
+
         public string Room { get; set; }
         public string NickName { get; set; }
-        public BufferBlock<global::Protocol.ClientProtocol> SendChan { get; set; }
-        public ulong MemoryId { get; set; }
+        public BufferBlock<ClientProtocol> SendChan { get; set; }
 
-        public User Copy()
+        public User Copy(ServerMemory memory)
         {
-            return new User
-            {
-                UID = this.UID,
-                Room = this.Room,
-                NickName = this.NickName,
-                SendChan = this.SendChan,
-                MemoryId = this.MemoryId
-            };
+            var user = memory.UserPool.Get();
+            user.UID = UID;
+            user.Room = Room;
+            user.NickName = NickName;
+            user.SendChan = SendChan;
+            user.MemoryId = MemoryId;
+            return user;
         }
 
         public override async Task Job(ServerMemory memory)
         {
             var users = memory.Users;
             var rooms = memory.Rooms;
-            var user = Copy();
+            var user = Copy(memory);
 
             users.Add(UID, user);
             if (!rooms.ContainsKey(Room))

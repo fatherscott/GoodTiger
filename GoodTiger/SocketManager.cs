@@ -23,6 +23,8 @@ namespace GoodTiger
         protected int _port { get; private set; } = 30000;
         public void Initialization(int port, int poolSize)
         {
+            Initialization();
+
             _port = port;
 
             _socketBufferPool = ObjectPool.Create<SocketBuffer>();
