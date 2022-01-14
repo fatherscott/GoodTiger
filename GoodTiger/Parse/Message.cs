@@ -8,10 +8,19 @@ using System.Threading.Tasks.Dataflow;
 
 namespace GoodTiger.Parse
 {
-    public static class Message
+    public class Message
     {
-        public static async Task<bool> Parse(this MessageRequest request, StateObject stateObject)
+        public static void Initialization()
         {
+            lock (SocketManager.PaserLock)
+            {
+                SocketManager.PaserList[ProtocolType.MessageRequest] = Parse;
+            }
+        }
+
+        public static async Task<bool> Parse(ClientProtocol packet, StateObject stateObject)
+        {
+            var request = packet as MessageRequest;
             if (string.IsNullOrWhiteSpace(stateObject.UID))
             {
                 return false;

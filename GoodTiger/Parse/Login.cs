@@ -5,11 +5,20 @@ using System.Threading.Tasks.Dataflow;
 
 namespace GoodTiger.Parse
 {
-    public static class Login
+    public class Login
     {
-        private static ulong _counter = 0;
-        public static async Task<bool> Parse(this LoginRequest request, StateObject stateObject)
+        public static void Initialization()
         {
+            lock (SocketManager.PaserLock)
+            {
+                SocketManager.PaserList[ProtocolType.LoginRequest] = Parse;
+            }
+        }
+
+        private static ulong _counter = 0;
+        static async Task<bool> Parse(ClientProtocol packet, StateObject stateObject)
+        {
+            var request = packet as LoginRequest;
             stateObject.UID = request.UID;
             stateObject.MemoryId = Interlocked.Add(ref _counter, 1); ;
 

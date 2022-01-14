@@ -1,7 +1,7 @@
 ﻿using GoodTiger.Parse;
 using Protocol;
 using System;
-using System.Net.Sockets;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -9,7 +9,15 @@ namespace GoodTiger
 {
     public partial class SocketManager
     {
+        public static Dictionary<ProtocolType, Func<ClientProtocol, StateObject, Task<bool>>> PaserList = new();
 
+        public readonly static object PaserLock = new();
+
+        static SocketManager()
+        {
+            Login.Initialization();
+            Message.Initialization();
+        }
         public async Task Send(StateObject stateObject)
         {
             try
@@ -23,7 +31,7 @@ namespace GoodTiger
                         return;
                     }
 
-                    await using var Strem = new NetworkStream(stateObject.Socket);
+                    await using var Strem = new System.Net.Sockets.NetworkStream(stateObject.Socket);
 
                     var buffer = stateObject.SendSocketBufferPool.Get();
                     await buffer.Write(Strem, protocol, stateObject.SendCancel.Token);
@@ -44,7 +52,7 @@ namespace GoodTiger
             {
                 while (true)
                 {
-                    await using var strem = new NetworkStream(stateObject.Socket, false);
+                    await using var strem = new System.Net.Sockets.NetworkStream(stateObject.Socket, false);
                     var obj = await stateObject.RecvBuffer.Read(strem, stateObject.RecvCancel.Token);
 
                     if (obj != null)
@@ -85,16 +93,9 @@ namespace GoodTiger
         {
             try
             {
-                switch (packet)
+                if (PaserList.ContainsKey(packet.Type))
                 {
-                    case LoginRequest login:
-                        return await login.Parse(stateObject);
-
-                    case MessageRequest message:
-                        return await message.Parse(stateObject);
-
-                    default:
-                        return false;
+                    return await PaserList[packet.Type](packet, stateObject);
                 }
             }
             catch (Exception)
@@ -105,6 +106,7 @@ namespace GoodTiger
             {
                 packet.Dispose();
             }
+            return false;
         }
     }
 }
