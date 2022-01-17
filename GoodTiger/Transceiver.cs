@@ -2,6 +2,8 @@
 using Protocol;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -10,13 +12,21 @@ namespace GoodTiger
     public partial class SocketManager
     {
         public static Dictionary<ProtocolType, Func<ClientProtocol, StateObject, Task<bool>>> PaserList = new();
-
-        public readonly static object PaserLock = new();
-
         static SocketManager()
         {
-            Login.Initialization();
-            Message.Initialization();
+            foreach (AssemblyName asmName in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+                Assembly.Load(asmName);
+
+            var types = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .SelectMany(asm => asm.GetTypes())
+                .Where(t => typeof(ClientParser).IsAssignableFrom(t) && !t.IsAbstract);
+
+            foreach (var t in types)
+            {
+                var method = t.GetMethod("Initialization");
+                method.Invoke(null, null);
+            }
         }
 
         public static void Initialization()

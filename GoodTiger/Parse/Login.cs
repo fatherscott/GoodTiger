@@ -5,14 +5,11 @@ using System.Threading.Tasks.Dataflow;
 
 namespace GoodTiger.Parse
 {
-    public class Login
+    public class Login : ClientParser
     {
-        public static void Initialization()
+        public static new void Initialization()
         {
-            lock (SocketManager.PaserLock)
-            {
-                SocketManager.PaserList[ProtocolType.LoginRequest] = Parse;
-            }
+            SocketManager.PaserList[ProtocolType.LoginRequest] = Parse;
         }
 
         private static ulong _counter = 0;
