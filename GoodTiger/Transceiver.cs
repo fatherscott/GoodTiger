@@ -56,8 +56,10 @@ namespace GoodTiger
                     protocol.Dispose();
                 }
             }
-            catch (Exception)
+            catch
             {
+                stateObject.RecvCancel.Cancel();
+                return;
             }
         }
 

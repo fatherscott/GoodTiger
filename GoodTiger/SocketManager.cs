@@ -53,38 +53,32 @@ namespace GoodTiger
             {
                 IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, _port);
 
-                listener = new Socket(localEndPoint.AddressFamily, SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
+                listener = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 listener.Bind(localEndPoint);
                 listener.Listen(100);
-
-                Logger.Instance.Info($"Bind IP:Any, Port:{_port}");
 
                 if (serverSocektChan != null)
                 {
                     await serverSocektChan.SendAsync(listener);
                 }
 
-
-                try
+                while (true)
                 {
-                    while (true)
+                    var state = await _stageObjectPool.ReceiveAsync();
+
+                    state.Clear();
+
+                    state.Socket = await listener.AcceptAsync();
+
+                    try
                     {
-                        var state = await _stageObjectPool.ReceiveAsync();
-
-                        state.Clear();
-
-                        state.Socket = await listener.AcceptAsync();
 #pragma warning disable CS4014
                         Task.Run(async () => await Recv(state));
 #pragma warning restore CS4014
                     }
+                    catch { }
                 }
-                catch (Exception e)
-                {
-                    Logger.Instance.Error("Exception", e);
-                }
-
             }
             catch (Exception e)
             {
