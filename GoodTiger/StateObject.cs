@@ -31,6 +31,8 @@ namespace GoodTiger
         {
             UID = string.Empty;
             MemoryId = 0;
+            Socket = null;
+            SendCancel = new CancellationTokenSource();
         }
 
     }
