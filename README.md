@@ -15,3 +15,11 @@ If you want to change the port, Change the value in appsetting.json:Port.
 ## Environmental variables
 
 Add the appsetting.{type}.json and pass the entered {type} value to the ENVIRONMENT variable.
+
+## Performance indicators
+
+I measured Request Per Second.
+
+It's not as fast as C++, but it's not bad.
+
+![](https://github.com/fatherscott/GoodTiger/blob/main/image/RPS.PNG)
