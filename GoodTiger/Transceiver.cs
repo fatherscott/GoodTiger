@@ -38,7 +38,7 @@ namespace GoodTiger
         {
             try
             {
-                while (await stateObject.SendChan.OutputAvailableAsync(stateObject.SendCancel.Token))
+                while (true)
                 {
                     var protocol = await stateObject.SendChan.ReceiveAsync();
 

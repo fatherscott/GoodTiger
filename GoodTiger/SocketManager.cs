@@ -53,7 +53,7 @@ namespace GoodTiger
             {
                 IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, _port);
 
-                listener = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                listener = new Socket(localEndPoint.AddressFamily, SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
 
                 listener.Bind(localEndPoint);
                 listener.Listen(100);

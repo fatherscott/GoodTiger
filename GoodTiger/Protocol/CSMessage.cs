@@ -8,9 +8,7 @@ namespace GoodTiger
 {
     public class CSMessage : ServerProtocol
     {
-        public string UID { get; set; }
         public string Message { get; set; }
-        public ulong MemoryId { get; set; }
 
         public override async Task Job(ServerMemory memory)
         {
