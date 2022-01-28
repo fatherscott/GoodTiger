@@ -44,13 +44,13 @@ namespace Protocol
             buffer.Worked = 0;
         }
 
-        public static ClientProtocol StreamToClass(ProtocolType type, StreamReader reader)
+        public static async Task<ClientProtocol> StreamToClass(ProtocolType type, StreamReader reader)
         {
             if (!_SystemType.ContainsKey(type))
             {
                 throw new Exception($"type not found {type.GetType().FullName}");
             }
-            var text = reader.ReadToEnd();
+            var text = await reader.ReadToEndAsync();
             var obj = JsonConvert.DeserializeObject(text, _SystemType[type]);
             return obj as ClientProtocol;
         }

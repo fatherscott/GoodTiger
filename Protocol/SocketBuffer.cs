@@ -108,7 +108,7 @@ namespace Protocol
 
             await using var ms = new MemoryStream(DataBuffer, 0, Worked);
             using var reader = new StreamReader(ms);
-            return ProtocolConverter.StreamToClass((ProtocolType)Type, reader);
+            return await ProtocolConverter.StreamToClass((ProtocolType)Type, reader);
         }
 
         public async Task<ClientProtocol> Read(NetworkStream strem, CancellationToken cancellationToken = default)
