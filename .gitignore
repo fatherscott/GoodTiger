@@ -8,3 +8,6 @@
 /Protocol/obj
 /Test/bin
 /Test/obj
+/flutter/.dart_tool
+/flutter/.idea
+/flutter/build
