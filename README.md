@@ -23,3 +23,9 @@ I measured Request Per Second.
 It's not as fast as C++, but it's not bad.
 
 ![](https://github.com/fatherscott/GoodTiger/blob/main/image/RPS.PNG)
+
+## GC Tuning
+
+It is confirmed that additional memory is not used during operation
+
+![](https://github.com/fatherscott/GoodTiger/blob/main/image/gc_tuning.PNG)
