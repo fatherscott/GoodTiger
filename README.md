@@ -26,6 +26,6 @@ It's not as fast as C++, but it's not bad.
 
 ## GC Tuning
 
-It is confirmed that additional memory is not used during operation
+Checked that 2nd generation gc is not occurring
 
 ![](https://github.com/fatherscott/GoodTiger/blob/main/image/gc_tuning.PNG)
