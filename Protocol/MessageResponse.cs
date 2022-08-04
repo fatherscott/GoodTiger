@@ -8,8 +8,8 @@ namespace Protocol
     public class MessageResponse : ClientProtocol
     {
         public override ProtocolType Type => ProtocolType.MessageResponse;
-        public string UID { get; set; }
-        public string Message { get; set; }
+        public long UID { get; set; }
+        public char[] Message = new char[64];
 
         private static DefaultObjectPool<MessageResponse> _pool;
         private static IPooledObjectPolicy<MessageResponse> _policy = new DefaultPooledObjectPolicy<MessageResponse>();

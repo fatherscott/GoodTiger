@@ -8,8 +8,8 @@ namespace Protocol
     public class LogoutResponse : ClientProtocol
     {
         public override ProtocolType Type => ProtocolType.LogoutResponse;
-        public string UID { get; set; }
-        public string NickName { get; set; }
+        public long UID { get; set; }
+        public char[] NickName = new char[32];
 
         private static DefaultObjectPool<LogoutResponse> _pool;
         private static IPooledObjectPolicy<LogoutResponse> _policy = new DefaultPooledObjectPolicy<LogoutResponse>();

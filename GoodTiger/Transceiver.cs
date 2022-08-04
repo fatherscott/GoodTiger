@@ -88,10 +88,11 @@ namespace GoodTiger
                 Console.WriteLine($"{e.Message}");
             }
 
-            if (!string.IsNullOrEmpty(stateObject.UID))
+            if (stateObject.UID != 0)
             {
                 CSLogout logout = CSLogout.Get() as CSLogout;
                 logout.UID = stateObject.UID;
+                logout.MemoryId = stateObject.MemoryId;
                 await stateObject.MainChan.SendAsync(logout);
             }
 

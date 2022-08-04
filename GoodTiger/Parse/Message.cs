@@ -18,17 +18,19 @@ namespace GoodTiger.Parse
         public static async Task<bool> Parse(ClientProtocol packet, StateObject stateObject)
         {
             var request = packet as MessageRequest;
-            if (string.IsNullOrWhiteSpace(stateObject.UID))
+            if (stateObject.UID == 0)
             {
                 return false;
             }
             var csMessage = CSMessage.Get() as CSMessage;
             csMessage.UID = stateObject.UID;
             csMessage.MemoryId = stateObject.MemoryId;
-            csMessage.Message = request.Message;
+
+            Array.Copy(request.Message, csMessage.Message, request.Message.Length);
+
             await stateObject.MainChan.SendAsync(csMessage);
 
-            Logger.Instance.Trace($"message {stateObject.UID}, { request.Message}");
+            //Logger.Instance.Trace($"message {stateObject.UID}, {request.Message}");
             return true;
         }
     }

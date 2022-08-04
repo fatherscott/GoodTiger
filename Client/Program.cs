@@ -11,42 +11,47 @@ namespace Client
 {
     class Program
     {
-        static BufferBlock<Socket> _serverSocektChan { get; set; } = new BufferBlock<Socket>();
+        //static BufferBlock<Socket> _serverSocektChan { get; set; } = new BufferBlock<Socket>();
         static async Task Main(string[] args)
         {
-            SocketManager manager = new SocketManager();
-            manager.Initialization(11000, 1000);
-            var server = Task.Run(async () =>
-                await manager.StartListening(_serverSocektChan)
-            );
+            var task1 =  Client.TestClient(1);
+            var task2 = Client.TestClient(2);
 
-            Socket listener = null;
+            await Task.WhenAll(task1, task2);
+            //SocketManager manager = new SocketManager();
+            //manager.Initialization(11000, 1000);
+            //var server = Task.Run(async () =>
+            //    await manager.StartListening(_serverSocektChan)
+            //);
 
-            try
-            {
-                listener = await _serverSocektChan.ReceiveAsync(TimeSpan.FromSeconds(5));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            //Socket listener = null;
 
-            await Task.Delay(1000);
+            //try
+            //{
+            //    listener = await _serverSocektChan.ReceiveAsync(TimeSpan.FromSeconds(5));
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e);
+            //}
 
-            for (int i = 0; i < 10000; i++)
-            {
-                var task1 = Client.TestClient(i);
-                //var task2 = Client.TestClient(i++);
-                //var task3 = Client.TestClient(i++);
-                //var task4 = Client.TestClient(i++);
-                //var task5 = Client.TestClient(i);
+            //await Task.Delay(1000);
 
-                //await Task.WhenAll(task1, task2, task3, task4, task5);
-                await Task.WhenAll(task1);
-            }
+            ////for (int i = 0; i < 1000; i++)
+            //{
+            //    int i = 0;
+            //    var task1 = Client.TestClient(i);
+            //    var task2 = Client.TestClient(i++);
+            //    var task3 = Client.TestClient(i++);
+            //    var task4 = Client.TestClient(i++);
+            //    var task5 = Client.TestClient(i++);
 
-            listener.Close();
-            await Task.WhenAll(server);
+            //    await Task.WhenAll(task1, task2, task3, task4, task5);
+            //    //await Task.WhenAll(task1);
+            //}
+
+            //listener.Close();
+            //await Task.WhenAll(server);
         }
     }
 }

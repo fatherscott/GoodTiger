@@ -6,7 +6,7 @@ namespace GoodTiger.Protocol
 {
     public abstract class ServerProtocol : Base
     {
-        public string UID { get; set; }
+        public long UID { get; set; }
         public ulong MemoryId { get; set; }
         public abstract Task Job(ServerMemory memory);
         public static ServerProtocol Get()

@@ -1,4 +1,5 @@
 ﻿using Protocol;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -23,7 +24,7 @@ namespace GoodTiger.Parse
             csLogin.UID = request.UID;
             csLogin.MemoryId = stateObject.MemoryId;
             csLogin.Room = request.Room;
-            csLogin.NickName = request.NickName;
+            Array.Copy(request.NickName, csLogin.NickName, request.NickName.Length);
             csLogin.SendChan = stateObject.SendChan;
             await stateObject.MainChan.SendAsync(csLogin);
 

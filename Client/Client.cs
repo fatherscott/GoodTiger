@@ -28,9 +28,9 @@ namespace Client
                 SocketBuffer socketBuffer = new SocketBuffer();
 
                 LoginRequest login = LoginRequest.Get() as LoginRequest;
-                login.UID = $"{uid}";
-                login.Room = $"1";
-                login.NickName = $"tiger{uid}";
+                login.UID = uid;
+                login.Room = 1;
+                login.NickName = $"tiger{uid}".ToCharArray();
 
                 {
                     await using var stream = new NetworkStream(client, false);
@@ -44,9 +44,9 @@ namespace Client
 
                 MessageRequest message = MessageRequest.Get() as MessageRequest;
 
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 9999999; i++)
                 {
-                    message.Message = $"Hello World {i}";
+                    message.Message = $"Hello World {i}".ToCharArray();
                     {
                         await using var stream = new NetworkStream(client, false);
                         await socketBuffer.Write(stream, message);

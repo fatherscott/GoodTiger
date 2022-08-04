@@ -9,8 +9,8 @@ namespace GoodTiger.Model
 {
     public class ServerMemory
     {
-        public Dictionary<string, User> Users { get; set; } = new Dictionary<string, User>();
-        public Dictionary<string, Dictionary<string, User>> Rooms { get; set; } = new Dictionary<string, Dictionary<string, User>>();
+        public Dictionary<long, User> Users { get; set; } = new Dictionary<long, User>();
+        public Dictionary<long, Dictionary<long, User>> Rooms { get; set; } = new Dictionary<long, Dictionary<long, User>>();
         public List<Task> Tasks { get; set; } = new List<Task>();
         public int ActiveRoomId { get; set; } = 0;
 

@@ -13,7 +13,7 @@ namespace GoodTiger
 {
     public class StateObject
     {
-        public string UID { get; set; } = string.Empty;
+        public long UID { get; set; } = 0;
         public ulong MemoryId { get; set; } = 0;
         public Socket Socket { get; set; } = null;
 
@@ -28,7 +28,7 @@ namespace GoodTiger
 
         public void Clear()
         {
-            UID = string.Empty;
+            UID = 0;
             MemoryId = 0;
             Socket = null;
         }

@@ -11,8 +11,8 @@ namespace GoodTiger
     public class CSLogin : ServerProtocol
     {
 
-        public string Room { get; set; }
-        public string NickName { get; set; }
+        public long Room { get; set; }
+        public char[] NickName = new char[32];
         public BufferBlock<ClientProtocol> SendChan { get; set; }
 
         public User Copy(ServerMemory memory)
@@ -35,7 +35,7 @@ namespace GoodTiger
             users.Add(UID, user);
             if (!rooms.ContainsKey(Room))
             {
-                rooms.Add(Room, new Dictionary<string, User>());
+                rooms.Add(Room, new Dictionary<long, User>());
             }
             rooms[Room][UID] = user;
 

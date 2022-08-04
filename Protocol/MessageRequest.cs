@@ -8,7 +8,7 @@ namespace Protocol
     public class MessageRequest : ClientProtocol
     {
         public override ProtocolType Type => ProtocolType.MessageRequest;
-        public string Message { get; set; }
+        public char[] Message = new char[64];
 
         private static DefaultObjectPool<MessageRequest> _pool;
         private static IPooledObjectPolicy<MessageRequest> _policy = new DefaultPooledObjectPolicy<MessageRequest>();

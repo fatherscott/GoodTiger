@@ -9,7 +9,7 @@ namespace GoodTiger
 {
     public class CSMessage : ServerProtocol
     {
-        public string Message { get; set; }
+        public char[] Message = new char[64];
 
         public override async Task Job(ServerMemory memory)
         {
