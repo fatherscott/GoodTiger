@@ -50,24 +50,25 @@ namespace GoodTiger
                     await using var Strem = new System.Net.Sockets.NetworkStream(stateObject.Socket);
 
                     var buffer = stateObject.SendSocketBufferPool.Get();
-                    await buffer.Write(Strem, protocol, stateObject.SendCancel.Token);
+                    await buffer.Write(Strem, protocol);
                     stateObject.SendSocketBufferPool.Return(buffer);
 
-                    protocol.Dispose();
+                    protocol.Return();
                 }
             }
             catch
             {
-                stateObject.RecvCancel.Cancel();
                 return;
             }
         }
 
         public async Task Recv(StateObject stateObject)
         {
-            var sendTask = Task.Run(async () => await Send(stateObject));
+            Task sendTask = null; 
             try
             {
+                sendTask = Task.Run(async () => await Send(stateObject));
+
                 while (true)
                 {
                     await using var strem = new System.Net.Sockets.NetworkStream(stateObject.Socket, false);
@@ -89,14 +90,11 @@ namespace GoodTiger
 
             if (!string.IsNullOrEmpty(stateObject.UID))
             {
-                CSLogout logout = new CSLogout
-                {
-                    UID = stateObject.UID
-                };
+                CSLogout logout = CSLogout.Get() as CSLogout;
+                logout.UID = stateObject.UID;
                 await stateObject.MainChan.SendAsync(logout);
             }
 
-            stateObject.SendCancel.Cancel();
             await stateObject.SendChan.SendAsync(null);
             await Task.WhenAll(sendTask);
 
@@ -122,7 +120,7 @@ namespace GoodTiger
             }
             finally
             {
-                packet.Dispose();
+                packet.Return();
             }
             return false;
         }

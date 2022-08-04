@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using GoodTiger;
+using Newtonsoft.Json;
 using Protocol;
 using System;
 using System.Net;
@@ -10,24 +11,42 @@ namespace Client
 {
     class Program
     {
+        static BufferBlock<Socket> _serverSocektChan { get; set; } = new BufferBlock<Socket>();
         static async Task Main(string[] args)
         {
-            Console.WriteLine("GoodTiger Client Start!");
+            SocketManager manager = new SocketManager();
+            manager.Initialization(11000, 1000);
+            var server = Task.Run(async () =>
+                await manager.StartListening(_serverSocektChan)
+            );
 
-            JsonSerializer jsonSerializer = new JsonSerializer();
+            Socket listener = null;
 
-            var clients = new ActionBlock<JsonSerializer>(Client.Work, new ExecutionDataflowBlockOptions
+            try
             {
-                MaxDegreeOfParallelism = 300
-            });
-
-            for(int i = 0; i < 90000; i++)
+                listener = await _serverSocektChan.ReceiveAsync(TimeSpan.FromSeconds(5));
+            }
+            catch (Exception e)
             {
-                clients.Post(jsonSerializer);
+                Console.WriteLine(e);
             }
 
-            clients.Complete();
-            await clients.Completion;
+            await Task.Delay(1000);
+
+            for (int i = 0; i < 10000; i++)
+            {
+                var task1 = Client.TestClient(i);
+                //var task2 = Client.TestClient(i++);
+                //var task3 = Client.TestClient(i++);
+                //var task4 = Client.TestClient(i++);
+                //var task5 = Client.TestClient(i);
+
+                //await Task.WhenAll(task1, task2, task3, task4, task5);
+                await Task.WhenAll(task1);
+            }
+
+            listener.Close();
+            await Task.WhenAll(server);
         }
     }
 }

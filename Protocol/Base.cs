@@ -27,5 +27,9 @@ namespace Protocol
             // .NET Framework에 의하여 관리되지 않는 외부 리소스들을 여기서 정리합니다.
             this.disposed = true;
         }
+      
+        public virtual void Return() { 
+        }
+
     }
 }

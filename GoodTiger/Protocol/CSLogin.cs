@@ -1,5 +1,6 @@
 ﻿using GoodTiger.Model;
 using GoodTiger.Protocol;
+using Microsoft.Extensions.ObjectPool;
 using Protocol;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -40,13 +41,28 @@ namespace GoodTiger
 
             foreach (var i in rooms[Room])
             {
-                var loginResponse = new LoginResponse()
-                {
-                    UID = UID,
-                    NickName = NickName,
-                };
+                var loginResponse = LoginResponse.Get() as LoginResponse;
+                loginResponse.UID = UID;
+                loginResponse.NickName = NickName;
                 await i.Value.SendChan.SendAsync(loginResponse);
             }
+        }
+
+        private static DefaultObjectPool<CSLogin> _pool;
+        private static IPooledObjectPolicy<CSLogin> _policy = new DefaultPooledObjectPolicy<CSLogin>();
+
+        static CSLogin()
+        {
+            _pool = new DefaultObjectPool<CSLogin>(_policy, PoolSize);
+        }
+
+        public new static ServerProtocol Get()
+        {
+            return _pool.Get();
+        }
+        public override void Return()
+        {
+            _pool.Return(this);
         }
     }
 }

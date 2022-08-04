@@ -1,5 +1,6 @@
 ﻿using GoodTiger.Model;
 using GoodTiger.Protocol;
+using Microsoft.Extensions.ObjectPool;
 using Protocol;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -8,7 +9,6 @@ namespace GoodTiger
 {
     public class CSLogout : ServerProtocol
     {
-
         public override async Task Job(ServerMemory memory)
         {
             var users = memory.Users;
@@ -28,11 +28,9 @@ namespace GoodTiger
 
                     foreach (var i in rooms[user.Room])
                     {
-                        var logoutResponse = new LogoutResponse()
-                        {
-                            UID = user.UID,
-                            NickName = user.NickName,
-                        };
+                        var logoutResponse = LogoutResponse.Get() as LogoutResponse;
+                        logoutResponse.UID = user.UID;
+                        logoutResponse.NickName = user.NickName;
                         await i.Value.SendChan.SendAsync(logoutResponse);
                     }
                 }
@@ -41,6 +39,23 @@ namespace GoodTiger
                     memory.UserPool.Return(user);
                 }
             }
+        }
+
+        private static DefaultObjectPool<CSLogout> _pool;
+        private static IPooledObjectPolicy<CSLogout> _policy = new DefaultPooledObjectPolicy<CSLogout>();
+
+        static CSLogout()
+        {
+            _pool = new DefaultObjectPool<CSLogout>(_policy, PoolSize);
+        }
+
+        public new static ServerProtocol Get()
+        {
+            return _pool.Get();
+        }
+        public override void Return()
+        {
+            _pool.Return(this);
         }
     }
 }

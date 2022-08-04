@@ -1,5 +1,6 @@
 ﻿using GoodTiger.Model;
 using GoodTiger.Protocol;
+using Microsoft.Extensions.ObjectPool;
 using Protocol;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -29,16 +30,31 @@ namespace GoodTiger
                     tasks.Clear();
                     foreach (var user in rooms[login.Room])
                     {
-                        var messageResponse = new MessageResponse()
-                        {
-                            UID = login.UID,
-                            Message = Message,
-                        };
+                        var messageResponse = MessageResponse.Get() as MessageResponse;
+                        messageResponse.UID = login.UID;
+                        messageResponse.Message = Message;
                         tasks.Add(user.Value.SendChan.SendAsync(messageResponse));
                     }
                     await Task.WhenAll(tasks);
                 }
             }
+        }
+
+        private static DefaultObjectPool<CSMessage> _pool;
+        private static IPooledObjectPolicy<CSMessage> _policy = new DefaultPooledObjectPolicy<CSMessage>();
+
+        static CSMessage()
+        {
+            _pool = new DefaultObjectPool<CSMessage>(_policy, PoolSize);
+        }
+
+        public new static ServerProtocol Get()
+        {
+            return _pool.Get();
+        }
+        public override void Return()
+        {
+            _pool.Return(this);
         }
     }
 }

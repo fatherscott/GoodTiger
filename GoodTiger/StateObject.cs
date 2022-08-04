@@ -22,7 +22,6 @@ namespace GoodTiger
 
         public BufferBlock<global::Protocol.ClientProtocol> SendChan { get; set; } = new BufferBlock<global::Protocol.ClientProtocol>();
         public ObjectPool<SocketBuffer> SendSocketBufferPool { get; set; } = null;
-        public CancellationTokenSource SendCancel { get; set; } = new CancellationTokenSource();
 
         public BufferBlock<ServerProtocol> MainChan { get; set; } = null;
         public BufferBlock<StateObject> StateObjectPool { get; set; } = null;
@@ -32,7 +31,6 @@ namespace GoodTiger
             UID = string.Empty;
             MemoryId = 0;
             Socket = null;
-            SendCancel = new CancellationTokenSource();
         }
 
     }

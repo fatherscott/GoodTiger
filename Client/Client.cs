@@ -13,9 +13,7 @@ namespace Client
 {
     public class Client
     {
-        public static int UID = 0;
-
-        public static async Task Work(JsonSerializer jsonSerializer)
+        public static async Task TestClient(int uid)
         {
             try
             {
@@ -29,35 +27,40 @@ namespace Client
 
                 SocketBuffer socketBuffer = new SocketBuffer();
 
-                var uid = Interlocked.Increment(ref UID);
+                LoginRequest login = LoginRequest.Get() as LoginRequest;
+                login.UID = $"{uid}";
+                login.Room = $"1";
+                login.NickName = $"tiger{uid}";
 
-                using (LoginRequest login = new LoginRequest() { UID = $"{uid}", Room = "1", NickName = $"tiger{uid}" })
                 {
                     await using var stream = new NetworkStream(client, false);
-                    await socketBuffer.Write(stream, login, jsonSerializer);
+                    await socketBuffer.Write(stream, login);
+                    login.Return();
                 }
                 {
                     await using var stream = new NetworkStream(client, false);
-                    var response = await socketBuffer.Read(stream, jsonSerializer);
+                    var response = await socketBuffer.Read(stream);
                 }
+
+                MessageRequest message = MessageRequest.Get() as MessageRequest;
 
                 for (int i = 0; i < 100; i++)
                 {
-                    using (MessageRequest message = new MessageRequest() { Message = $"Hello World {i}" })
+                    message.Message = $"Hello World {i}";
                     {
                         await using var stream = new NetworkStream(client, false);
-                        await socketBuffer.Write(stream, message, jsonSerializer);
+                        await socketBuffer.Write(stream, message);
                     }
                     {
                         await using var stream = new NetworkStream(client, false);
-                        var response = await socketBuffer.Read(stream, jsonSerializer);
+                        var response = await socketBuffer.Read(stream);
                     }
                 }
                 client.Close();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Console.WriteLine($"{e.Message }, {e.StackTrace}");
+                Console.WriteLine(e);
             }
         }
     }

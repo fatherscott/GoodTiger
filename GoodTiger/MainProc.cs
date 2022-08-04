@@ -40,7 +40,7 @@ namespace GoodTiger
                 }
                 finally
                 {
-                    obj.Dispose();
+                    obj.Return();
                 }
             }
         }

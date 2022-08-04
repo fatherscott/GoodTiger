@@ -19,7 +19,7 @@ namespace GoodTiger.Parse
             stateObject.UID = request.UID;
             stateObject.MemoryId = Interlocked.Add(ref _counter, 1); ;
 
-            var csLogin = new CSLogin();
+            var csLogin = CSLogin.Get() as CSLogin;
             csLogin.UID = request.UID;
             csLogin.MemoryId = stateObject.MemoryId;
             csLogin.Room = request.Room;

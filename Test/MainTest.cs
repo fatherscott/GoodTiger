@@ -33,19 +33,26 @@ namespace BasicTest
 
                 SocketBuffer socketBuffer = new SocketBuffer();
 
-                using (LoginRequest login = new LoginRequest() { UID = $"{uid}", Room = "1", NickName = $"tiger{uid}" })
+                LoginRequest login = LoginRequest.Get() as LoginRequest;
+                login.UID = $"{uid}";
+                login.Room = $"1";
+                login.NickName = $"tiger{uid}";
+               
                 {
                     await using var stream = new NetworkStream(client, false);
                     await socketBuffer.Write(stream, login);
+                    login.Return();
                 }
                 {
                     await using var stream = new NetworkStream(client, false);
                     var response = await socketBuffer.Read(stream);
                 }
 
+                MessageRequest message = MessageRequest.Get() as MessageRequest;
+
                 for (int i = 0; i < 100; i++)
                 {
-                    using (MessageRequest message = new MessageRequest() { Message = $"Hello World {i}" })
+                    message.Message = $"Hello World {i}";
                     {
                         await using var stream = new NetworkStream(client, false);
                         await socketBuffer.Write(stream, message);
@@ -87,7 +94,10 @@ namespace BasicTest
 
             await Task.Delay(1000);
 
-            await TestClient(1);
+            for(int i = 0; i < 1; i++)
+            {
+                await TestClient(i);
+            }
 
             listener.Close();
             await Task.WhenAll(server);

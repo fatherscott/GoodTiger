@@ -22,7 +22,7 @@ namespace GoodTiger.Parse
             {
                 return false;
             }
-            var csMessage = new CSMessage();
+            var csMessage = CSMessage.Get() as CSMessage;
             csMessage.UID = stateObject.UID;
             csMessage.MemoryId = stateObject.MemoryId;
             csMessage.Message = request.Message;

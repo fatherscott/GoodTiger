@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.ObjectPool;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,5 +9,22 @@ namespace Protocol
     {
         public override ProtocolType Type => ProtocolType.MessageRequest;
         public string Message { get; set; }
+
+        private static DefaultObjectPool<MessageRequest> _pool;
+        private static IPooledObjectPolicy<MessageRequest> _policy = new DefaultPooledObjectPolicy<MessageRequest>();
+
+        static MessageRequest()
+        {
+            _pool = new DefaultObjectPool<MessageRequest>(_policy, PoolSize);
+        }
+
+        public new static ClientProtocol Get()
+        {
+            return _pool.Get();
+        }
+        public override void Return()
+        {
+            _pool.Return(this);
+        }
     }
 }
