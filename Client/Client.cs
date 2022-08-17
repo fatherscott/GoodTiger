@@ -44,7 +44,7 @@ namespace Client
 
                 MessageRequest message = MessageRequest.Get() as MessageRequest;
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 99999; i++)
                 {
                     message.Message = $"Hello World {i}".ToCharArray();
                     {

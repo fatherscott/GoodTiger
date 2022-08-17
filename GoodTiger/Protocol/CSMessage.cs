@@ -24,6 +24,7 @@ namespace GoodTiger
                 {
                     return;
                 }
+
                 if (rooms.ContainsKey(login.Room))
                 {
                     foreach (var user in rooms[login.Room])
