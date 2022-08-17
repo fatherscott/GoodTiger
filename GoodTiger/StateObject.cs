@@ -7,6 +7,7 @@ using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
 namespace GoodTiger
@@ -26,11 +27,17 @@ namespace GoodTiger
         public BufferBlock<ServerProtocol> MainChan { get; set; } = null;
         public BufferBlock<StateObject> StateObjectPool { get; set; } = null;
 
-        public void Clear()
+        public async Task Clear()
         {
             UID = 0;
             MemoryId = 0;
             Socket = null;
+            while (SendChan.Count > 0)
+            {
+                var packet = await SendChan.ReceiveAsync();
+                packet?.Return();
+            }
+
         }
 
     }

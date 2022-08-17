@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Protocol;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -14,14 +15,15 @@ namespace Client
         //static BufferBlock<Socket> _serverSocektChan { get; set; } = new BufferBlock<Socket>();
         static async Task Main(string[] args)
         {
-            for (int i = 0; i < 9999999; i += 4)
+            List<Task> tasks = new List<Task>();
+            for (int i = 1; i < 9999999; i += 1)
             {
-                var task1 = Client.TestClient(i + 1);
-                var task2 = Client.TestClient(i + 2);
-                var task3 = Client.TestClient(i + 3);
-                var task4 = Client.TestClient(i + 4);
-
-                await Task.WhenAll(task1, task2, task3, task4);
+                tasks.Clear();
+                for (int ii = 0; ii < 1; ii++)
+                {
+                    tasks.Add(Client.TestClient(i + ii));
+                }
+                await Task.WhenAll(tasks.ToArray());
             }
 
             //SocketManager manager = new SocketManager();

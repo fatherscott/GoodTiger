@@ -65,14 +65,11 @@ namespace GoodTiger
 
                 while (true)
                 {
-                    var state = await _stageObjectPool.ReceiveAsync();
-
-                    state.Clear();
-
-                    state.Socket = await listener.AcceptAsync();
-
                     try
                     {
+                        var state = await _stageObjectPool.ReceiveAsync();
+                        state.Socket = await listener.AcceptAsync();
+
 #pragma warning disable CS4014
                         Task.Run(async () => await Recv(state));
 #pragma warning restore CS4014

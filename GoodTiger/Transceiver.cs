@@ -72,7 +72,7 @@ namespace GoodTiger
                 while (true)
                 {
                     await using var strem = new System.Net.Sockets.NetworkStream(stateObject.Socket, false);
-                    var obj = await stateObject.RecvBuffer.Read(strem, stateObject.RecvCancel.Token);
+                    using var obj = await stateObject.RecvBuffer.Read(strem, stateObject.RecvCancel.Token);
 
                     if (obj != null)
                     {
@@ -103,6 +103,7 @@ namespace GoodTiger
 
             stateObject.Socket.Close();
 
+            await stateObject.Clear();
             await stateObject.StateObjectPool.SendAsync(stateObject);
         }
 
