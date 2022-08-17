@@ -14,10 +14,16 @@ namespace Client
         //static BufferBlock<Socket> _serverSocektChan { get; set; } = new BufferBlock<Socket>();
         static async Task Main(string[] args)
         {
-            var task1 =  Client.TestClient(1);
-            var task2 = Client.TestClient(2);
+            for (int i = 0; i < 9999999; i += 4)
+            {
+                var task1 = Client.TestClient(i + 1);
+                var task2 = Client.TestClient(i + 2);
+                var task3 = Client.TestClient(i + 3);
+                var task4 = Client.TestClient(i + 4);
 
-            await Task.WhenAll(task1, task2);
+                await Task.WhenAll(task1, task2, task3, task4);
+            }
+
             //SocketManager manager = new SocketManager();
             //manager.Initialization(11000, 1000);
             //var server = Task.Run(async () =>

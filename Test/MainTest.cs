@@ -45,7 +45,7 @@ namespace BasicTest
                 }
                 {
                     await using var stream = new NetworkStream(client, false);
-                    var response = await socketBuffer.Read(stream);
+                    using var response = await socketBuffer.Read(stream);
                 }
 
                 MessageRequest message = MessageRequest.Get() as MessageRequest;
@@ -59,9 +59,11 @@ namespace BasicTest
                     }
                     {
                         await using var stream = new NetworkStream(client, false);
-                        var response = await socketBuffer.Read(stream);
+                        using var response = await socketBuffer.Read(stream);
                     }
                 }
+                message.Return();
+
                 client.Close();
             }
             catch (Exception e)
@@ -94,7 +96,7 @@ namespace BasicTest
 
             await Task.Delay(1000);
 
-            for(int i = 0; i < 1; i++)
+            for(int i = 1; i < 2; i++)
             {
                 await TestClient(i);
             }
