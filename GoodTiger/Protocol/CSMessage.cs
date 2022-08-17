@@ -24,18 +24,15 @@ namespace GoodTiger
                 {
                     return;
                 }
-
                 if (rooms.ContainsKey(login.Room))
                 {
-                    tasks.Clear();
                     foreach (var user in rooms[login.Room])
                     {
                         var messageResponse = MessageResponse.Get() as MessageResponse;
                         messageResponse.UID = login.UID;
                         messageResponse.Message = Message;
-                        tasks.Add(user.Value.SendChan.SendAsync(messageResponse));
+                        await user.Value.SendChan.SendAsync(messageResponse);
                     }
-                    await Task.WhenAll(tasks);
                 }
             }
         }
