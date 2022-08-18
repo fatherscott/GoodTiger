@@ -15,26 +15,20 @@ namespace GoodTiger
         {
             var users = memory.Users;
             var rooms = memory.Rooms;
-            var tasks = memory.Tasks;
+            //var tasks = memory.Tasks;
 
             if (users.ContainsKey(UID))
             {
-                var login = users[UID];
-                if (login.MemoryId != MemoryId)
+                var user = users[UID];
+                if (user.MemoryId != MemoryId)
                 {
                     return;
                 }
 
-                if (rooms.ContainsKey(login.Room))
-                {
-                    foreach (var user in rooms[login.Room])
-                    {
-                        var messageResponse = MessageResponse.Get() as MessageResponse;
-                        messageResponse.UID = login.UID;
-                        messageResponse.Message = Message;
-                        await user.Value.SendChan.SendAsync(messageResponse);
-                    }
-                }
+                var messageResponse = MessageResponse.Get() as MessageResponse;
+                messageResponse.UID = user.UID;
+                Array.Copy(messageResponse.Message, Message, Message.Length);
+                await user.SendChan.SendAsync(messageResponse);
             }
         }
 
