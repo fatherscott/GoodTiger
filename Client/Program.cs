@@ -16,10 +16,10 @@ namespace Client
         static async Task Main(string[] args)
         {
             List<Task> tasks = new List<Task>();
-            for (int i = 1; i < 9999999; i += 20)
+            for (int i = 1; i < 9999999; i += 1000)
             {
                 tasks.Clear();
-                for (int ii = 0; ii < 20; ii++)
+                for (int ii = 0; ii < 1000; ii++)
                 {
                     tasks.Add(Client.TestClient(i + ii));
                 }
