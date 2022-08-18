@@ -2,6 +2,7 @@
 using GoodTiger.Protocol;
 using Microsoft.Extensions.ObjectPool;
 using Protocol;
+using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
