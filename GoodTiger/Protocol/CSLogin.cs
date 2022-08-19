@@ -32,6 +32,11 @@ namespace GoodTiger
             var rooms = memory.Rooms;
             var user = Copy(memory);
 
+            if (users.ContainsKey(UID))
+            {
+                users[UID].Return();
+            }
+
             users.Add(UID, user);
             if (!rooms.ContainsKey(Room))
             {

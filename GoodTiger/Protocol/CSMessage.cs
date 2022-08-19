@@ -21,7 +21,7 @@ namespace GoodTiger
             if (users.ContainsKey(UID))
             {
                 var user = users[UID];
-                if (user.MemoryId != MemoryId)
+                if (!Verify(user))
                 {
                     return;
                 }

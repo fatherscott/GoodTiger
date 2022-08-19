@@ -21,11 +21,13 @@ namespace GoodTiger
         public SocketBuffer RecvBuffer { get; set; } = new SocketBuffer();
         public CancellationTokenSource RecvCancel { get; set; } = default;
 
-        public BufferBlock<global::Protocol.ClientProtocol> SendChan { get; set; } = new BufferBlock<global::Protocol.ClientProtocol>();
+        public BufferBlock<ClientProtocol> SendChan { get; set; } = new BufferBlock<ClientProtocol>();
         public ObjectPool<SocketBuffer> SendSocketBufferPool { get; set; } = null;
 
         public BufferBlock<ServerProtocol> MainChan { get; set; } = null;
         public BufferBlock<StateObject> StateObjectPool { get; set; } = null;
+
+        public AutoResetEvent MainChanExit = new AutoResetEvent(false);
 
         public async Task Clear()
         {
@@ -37,7 +39,7 @@ namespace GoodTiger
                 var packet = await SendChan.ReceiveAsync();
                 packet?.Return();
             }
-
+            SendChan = new BufferBlock<ClientProtocol>();
         }
 
     }

@@ -23,8 +23,7 @@ namespace GoodTiger.Parse
                 return false;
             }
             var csMessage = CSMessage.Get() as CSMessage;
-            csMessage.UID = stateObject.UID;
-            csMessage.MemoryId = stateObject.MemoryId;
+            csMessage.SetState(stateObject);
 
             Array.Copy(request.Message, csMessage.Message, request.Message.Length);
 

@@ -14,6 +14,21 @@ namespace GoodTiger.Protocol
             return null;
         }
 
+        public void SetState(StateObject state)
+        {
+            UID = state.UID;
+            MemoryId = state.MemoryId;
+        }
+
+        public bool Verify(User user)
+        {
+            if (user.MemoryId != MemoryId)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public const int PoolSize = 2;
     }
 }

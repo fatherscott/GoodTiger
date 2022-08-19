@@ -1,14 +1,17 @@
-﻿using GoodTiger.Model;
-using GoodTiger.Protocol;
-using Microsoft.Extensions.ObjectPool;
+﻿using Microsoft.Extensions.ObjectPool;
 using Protocol;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using System.Threading;
+using GoodTiger.Protocol;
+using GoodTiger.Model;
 
-namespace GoodTiger
+namespace SocketServer
 {
     public class CSLogout : ServerProtocol
     {
+        public AutoResetEvent MainChanExit { get; set; } = null;
+
         public override async Task Job(ServerMemory memory)
         {
             var users = memory.Users;
@@ -16,8 +19,13 @@ namespace GoodTiger
 
             if (users.ContainsKey(UID))
             {
-
                 var user = users[UID];
+
+                if (!Verify(user))
+                {
+                    return;
+                }
+
                 try
                 {
                     if (rooms.ContainsKey(user.Room))
@@ -39,6 +47,7 @@ namespace GoodTiger
                     memory.UserPool.Return(user);
                 }
             }
+            MainChanExit?.Set();
         }
 
         private static DefaultObjectPool<CSLogout> _pool;

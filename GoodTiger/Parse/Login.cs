@@ -21,8 +21,8 @@ namespace GoodTiger.Parse
             stateObject.MemoryId = Interlocked.Add(ref _counter, 1); ;
 
             var csLogin = CSLogin.Get() as CSLogin;
-            csLogin.UID = request.UID;
-            csLogin.MemoryId = stateObject.MemoryId;
+            csLogin.SetState(stateObject);
+
             csLogin.Room = request.Room;
             Array.Copy(request.NickName, csLogin.NickName, request.NickName.Length);
             csLogin.SendChan = stateObject.SendChan;

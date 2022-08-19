@@ -1,5 +1,6 @@
 ﻿using GoodTiger.Parse;
 using Protocol;
+using SocketServer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,12 +92,15 @@ namespace GoodTiger
             if (stateObject.UID != 0)
             {
                 CSLogout logout = CSLogout.Get() as CSLogout;
-                logout.UID = stateObject.UID;
-                logout.MemoryId = stateObject.MemoryId;
+                logout.SetState(stateObject);
+                logout.MainChanExit = stateObject.MainChanExit;
                 await stateObject.MainChan.SendAsync(logout);
+
+                stateObject.MainChanExit.WaitOne();
             }
 
             await stateObject.SendChan.SendAsync(null);
+            stateObject.SendChan.Complete();
             await Task.WhenAll(sendTask);
 
             Logger.Instance.Trace($"exit {stateObject.UID}");
