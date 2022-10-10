@@ -15,7 +15,7 @@ namespace GoodTiger
 
         static async Task Main(string[] args)
         {
-            Console.WriteLine($"GoodTimger Start");
+            Console.WriteLine($"GoodTiger Start");
 
             var environment = Environment.GetEnvironmentVariable("ENVIRONMENT");
 
